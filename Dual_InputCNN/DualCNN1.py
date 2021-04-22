@@ -1,11 +1,7 @@
-import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from tensorflow.keras.applications import ResNet50
-import tensorflow_datasets as tfds
 from Dual_InputCNN.DataImport import import_data
-from tensorflow.keras.utils import plot_model
 import matplotlib.pyplot as plt
 from tensorflow.keras.optimizers import SGD
 
@@ -83,7 +79,7 @@ class BinaryCNN:
 
         # self.concatenate_layer = layers.Concatenate(axis=1)
         # self.z = self.concatenate_layer([self.x, self.y])
-        
+
         self.z = layers.Dropout(0.2)(combined)
         # self.z = layers.Dense(128, activation='relu')(self.z)
         self.z = layers.Dense(2)(self.z)
