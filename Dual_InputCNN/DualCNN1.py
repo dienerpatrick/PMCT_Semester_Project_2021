@@ -12,7 +12,7 @@ class BinaryCNN:
 
         self.epochs = epochs
 
-        self.train_images, self.val_images, self.train_labels, self.val_labels = import_data(batch_size=batch_size)
+        self.train_ds, self.val_ds = import_data(batch_size=batch_size)
 
         self.data_augmentation = tf.keras.Sequential([
             tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'),
@@ -38,8 +38,8 @@ class BinaryCNN:
         #                       BUILD MODEL                          #
         ##############################################################
 
-        self.input_x = keras.Input(shape=(512, 512, 1))
-        self.input_y = keras.Input(shape=(512, 512, 1))
+        self.input_x = keras.Input(shape=(512, 512, 1), name="input_1")
+        self.input_y = keras.Input(shape=(512, 512, 1), name="input_2")
 
         self.x = self.data_augmentation(self.input_x)
         self.x = layers.experimental.preprocessing.Rescaling(1. / 255)(self.x)
@@ -86,16 +86,15 @@ class BinaryCNN:
 
         self.model = keras.Model(inputs=[self.x.input, self.y.input], outputs=self.z)
 
-        opt = SGD(lr=0.01)
+        opt = SGD(lr=0.0001)
 
         self.model.compile(optimizer=opt,
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
 
-        self.history = self.model.fit(x=self.train_images,
-                                      y=self.train_labels,
+        self.history = self.model.fit(self.train_ds,
                                       epochs=self.epochs,
-                                      validation_data=(self.val_images, self.val_labels))
+                                      validation_data=self.val_ds)
 
         acc = self.history.history['accuracy']
         val_acc = self.history.history['val_accuracy']

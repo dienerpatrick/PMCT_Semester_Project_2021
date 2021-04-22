@@ -18,7 +18,7 @@ def import_data(batch_size):
         seed=shuffle_seed,
         image_size=(512, 512),
         color_mode="grayscale",
-        batch_size=None)
+        batch_size=1)
 
     ap_val_ds = tf.keras.preprocessing.image_dataset_from_directory(
         ap_train_dir,
@@ -27,7 +27,7 @@ def import_data(batch_size):
         seed=shuffle_seed,
         image_size=(512, 512),
         color_mode="grayscale",
-        batch_size=None)
+        batch_size=1)
 
     l_train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         l_train_dir,
@@ -36,7 +36,7 @@ def import_data(batch_size):
         seed=shuffle_seed,
         image_size=(512, 512),
         color_mode="grayscale",
-        batch_size=None)
+        batch_size=1)
 
     l_val_ds = tf.keras.preprocessing.image_dataset_from_directory(
         l_train_dir,
@@ -45,7 +45,7 @@ def import_data(batch_size):
         seed=shuffle_seed,
         image_size=(512, 512),
         color_mode="grayscale",
-        batch_size=None)
+        batch_size=1)
 
     train_labels = np.concatenate([y for x, y in ap_train_ds], axis=0)  # .astype('float32').reshape((-1,2))
     val_labels = np.concatenate([y for x, y in ap_val_ds], axis=0)  # .astype('float32').reshape((-1,2))
