@@ -8,10 +8,11 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import random
 
-data_dir = os.path.join(os.getcwd(), '..', 'DATA/Sorted_Data/AP_Sorted/AP_Train')
+
+data_dir = os.path.join(os.getcwd(), '..', 'DATA/Sorted_Data/AP_Sorted_Bin_NoTest')
 
 SHUFFLE_SEED = random.randint(111, 999)
-
+num_classes = 2
 EPOCHS = 10
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
@@ -21,7 +22,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
   seed= SHUFFLE_SEED,
   image_size=(512, 512),
   color_mode="grayscale",
-  batch_size=16)
+  batch_size=32)
 
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   data_dir,
@@ -30,46 +31,49 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   seed=SHUFFLE_SEED,
   image_size=(512, 512),
   color_mode="grayscale",
-  batch_size=16)
+  batch_size=32)
+
+AUTOTUNE = tf.data.experimental.AUTOTUNE
+
+train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
 normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-image_batch, labels_batch = next(iter(normalized_ds))
 
 data_augmentation = keras.Sequential(
   [
-    layers.experimental.preprocessing.RandomFlip("horizontal"),
+    layers.experimental.preprocessing.RandomFlip("horizontal", input_shape=(512, 512, 1)),
     layers.experimental.preprocessing.RandomRotation(0.1),
     layers.experimental.preprocessing.RandomZoom(0.1),
   ]
 )
 
-num_classes = 2
-
 model = tf.keras.Sequential([
   data_augmentation,
-  layers.experimental.preprocessing.Rescaling(1./255),
+  layers.experimental.preprocessing.Rescaling(1./255, input_shape=(512, 512, 1)),
+  layers.Conv2D(64, 3, activation='relu'),
+  layers.MaxPooling2D(),
+  # layers.Dropout(0.3),
   layers.Conv2D(32, 3, activation='relu'),
   layers.MaxPooling2D(),
-  layers.Dropout(0.3),
-  layers.Conv2D(32, 3, activation='relu'),
+  # layers.Dropout(0.3),
+  layers.Conv2D(16, 3, activation='relu'),
   layers.MaxPooling2D(),
-  layers.Dropout(0.3),
-  layers.Conv2D(32, 3, activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Dropout(0.3),
-  layers.Conv2D(32, 3, activation='relu'),
+  # layers.Dropout(0.3),
+  layers.Conv2D(16, 3, activation='relu'),
   layers.MaxPooling2D(),
   layers.Dropout(0.3),
   layers.Flatten(),
   # layers.Dense(256, activation='relu'),
-  layers.Dense(128, activation='relu'),
+  layers.Dense(128),
+  layers.Activation('relu'),
   layers.Dense(num_classes)
 ])
 
 model.compile(
   optimizer='adam',
-  loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
   metrics=['accuracy'])
 
 history = model.fit(

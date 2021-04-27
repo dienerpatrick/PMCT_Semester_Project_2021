@@ -4,6 +4,7 @@ from tensorflow.keras import layers
 from Dual_InputCNN.DataImport import import_data
 import matplotlib.pyplot as plt
 from tensorflow.keras.optimizers import SGD
+import math
 
 
 class BinaryCNN:
@@ -62,13 +63,13 @@ class BinaryCNN:
         self.y = layers.experimental.preprocessing.Rescaling(1. / 255)(self.y)
         self.y = layers.Conv2D(32, 3, activation='relu')(self.y)
         self.y = layers.MaxPooling2D()(self.y)
-        self.y = layers.Dropout(0.3)(self.y)
+        # self.y = layers.Dropout(0.3)(self.y)
         self.y = layers.Conv2D(32, 3, activation='relu')(self.y)
         self.y = layers.MaxPooling2D()(self.y)
-        self.y = layers.Dropout(0.3)(self.y)
+        # self.y = layers.Dropout(0.3)(self.y)
         self.y = layers.Conv2D(32, 3, activation='relu')(self.y)
         self.y = layers.MaxPooling2D()(self.y)
-        self.y = layers.Dropout(0.3)(self.y)
+        # self.y = layers.Dropout(0.3)(self.y)
         self.y = layers.Conv2D(32, 3, activation='relu')(self.y)
         self.y = layers.MaxPooling2D()(self.y)
         self.y = layers.Dropout(0.3)(self.y)
@@ -76,9 +77,6 @@ class BinaryCNN:
         self.y = keras.Model(inputs=self.input_y, outputs=self.y)
 
         combined = layers.concatenate([self.x.output, self.y.output])
-
-        # self.concatenate_layer = layers.Concatenate(axis=1)
-        # self.z = self.concatenate_layer([self.x, self.y])
 
         self.z = layers.Dropout(0.2)(combined)
         # self.z = layers.Dense(128, activation='relu')(self.z)
@@ -88,12 +86,19 @@ class BinaryCNN:
 
         opt = SGD(lr=0.0001)
 
-        self.model.compile(optimizer=opt,
+        self.model.compile(optimizer=tf.keras.optimizers.Adam(),
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
 
+        def lr_decay(epoch):
+            return 0.001 * math.pow(0.6, epoch)
+
+        # lr schedule callback
+        lr_decay_callback = tf.keras.callbacks.LearningRateScheduler(lr_decay, verbose=True)
+
         self.history = self.model.fit(self.train_ds,
                                       epochs=self.epochs,
+                                      callbacks=[lr_decay_callback],
                                       validation_data=self.val_ds)
 
         acc = self.history.history['accuracy']
@@ -110,7 +115,7 @@ class BinaryCNN:
         plt.plot(epochs_range, acc, label='Training Accuracy')
         plt.plot(epochs_range, val_acc, label='Validation Accuracy')
         plt.legend(loc='lower right')
-        plt.title(f'Training and Validation Accuracy with Seed: {SHUFFLE_SEED}')
+        plt.title(f'Training and Validation Accuracy')
 
         plt.subplot(1, 2, 2)
         plt.plot(epochs_range, loss, label='Training Loss')
@@ -118,7 +123,9 @@ class BinaryCNN:
         plt.legend(loc='upper right')
         plt.title('Training and Validation Loss')
 
+        plt.show()
 
 
 
-TestNetwork = BinaryCNN(batch_size=128, epochs=10)
+
+TestNetwork = BinaryCNN(batch_size=16, epochs=5)
