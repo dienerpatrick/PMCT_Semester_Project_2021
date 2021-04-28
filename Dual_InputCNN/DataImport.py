@@ -49,7 +49,7 @@ def import_data(batch_size):
 
     train_labels = np.concatenate([y for x, y in ap_train_ds], axis=0)  # .astype('float32').reshape((-1,2))
     val_labels = np.concatenate([y for x, y in ap_val_ds], axis=0)  # .astype('float32').reshape((-1,2))
-    print(train_labels)
+    # print(train_labels)
 
     ap_train_images = np.squeeze(np.concatenate([x for x, y in ap_train_ds], axis=0))
     l_train_images = np.squeeze(np.concatenate([x for x, y in l_train_ds], axis=0))

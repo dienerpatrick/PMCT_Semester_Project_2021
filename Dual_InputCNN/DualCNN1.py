@@ -46,13 +46,13 @@ class BinaryCNN:
         self.x = layers.experimental.preprocessing.Rescaling(1. / 255)(self.x)
         self.x = layers.Conv2D(32, 3, activation='relu')(self.x)
         self.x = layers.MaxPooling2D()(self.x)
-        self.x = layers.Dropout(0.3)(self.x)
+        #  self.x = layers.Dropout(0.3)(self.x)
         self.x = layers.Conv2D(32, 3, activation='relu')(self.x)
         self.x = layers.MaxPooling2D()(self.x)
-        self.x = layers.Dropout(0.3)(self.x)
+        # self.x = layers.Dropout(0.3)(self.x)
         self.x = layers.Conv2D(32, 3, activation='relu')(self.x)
         self.x = layers.MaxPooling2D()(self.x)
-        self.x = layers.Dropout(0.3)(self.x)
+        # self.x = layers.Dropout(0.3)(self.x)
         self.x = layers.Conv2D(32, 3, activation='relu')(self.x)
         self.x = layers.MaxPooling2D()(self.x)
         self.x = layers.Dropout(0.3)(self.x)
@@ -79,16 +79,17 @@ class BinaryCNN:
         combined = layers.concatenate([self.x.output, self.y.output])
 
         self.z = layers.Dropout(0.2)(combined)
-        # self.z = layers.Dense(128, activation='relu')(self.z)
-        self.z = layers.Dense(2)(self.z)
+        self.z = layers.Dense(128)(self.z)
+        self.z = layers.Activation('relu')(self.z)
+        self.z = layers.Dense(4)(self.z)
 
         self.model = keras.Model(inputs=[self.x.input, self.y.input], outputs=self.z)
 
         opt = SGD(lr=0.0001)
 
-        self.model.compile(optimizer=tf.keras.optimizers.Adam(),
+        self.model.compile(optimizer='adam',
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                           metrics=['accuracy'])
+                           metrics='accuracy')
 
         def lr_decay(epoch):
             return 0.001 * math.pow(0.6, epoch)
@@ -98,7 +99,7 @@ class BinaryCNN:
 
         self.history = self.model.fit(self.train_ds,
                                       epochs=self.epochs,
-                                      callbacks=[lr_decay_callback],
+                                      # callbacks=[lr_decay_callback],
                                       validation_data=self.val_ds)
 
         acc = self.history.history['accuracy']
@@ -128,4 +129,4 @@ class BinaryCNN:
 
 
 
-TestNetwork = BinaryCNN(batch_size=16, epochs=5)
+TestNetwork = BinaryCNN(batch_size=16, epochs=20)
