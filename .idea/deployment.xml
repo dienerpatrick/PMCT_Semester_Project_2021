@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="ubuntu@ec2-3-120-189-4.eu-central-1.compute.amazonaws.com:22">
+  <component name="PublishConfigData" autoUpload="Always">
     <serverData>
-      <paths name="ubuntu@ec2-3-120-189-4.eu-central-1.compute.amazonaws.com:22">
+      <paths name="PS_CTANALYSIS">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_287" local="$PROJECT_DIR$" />
+            <mapping deploy="/home/paperspace/PyCharmProjects/CTANALYSIS" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
